@@ -65,25 +65,26 @@ void recursiveDFS(node* start, vector<int>& visited) {
 // iter through dfs remembering the prior parent
 // if node connects to an already visited node that isn't the prior node, a cycle was made.
 
-void detectCycle(node* curr, node* parent, vector<int>& visited) {
-    if(visited[curr->value] == 1) {
-        return;
+bool detectCycle(node* curr, node* parent, vector<int>& visited, bool& cycle) {
+    if(visited[curr->value] = 1 && cycle == true) {
+        return cycle;
     }
 
     visited[curr->value] = 1;
 
-    for(auto elem : curr->neighbors) {
-        if(parent != nullptr && elem != parent) {
-            if(visited[elem->value] == 1) {
-                cout << "CYCLE CYCLE CYCLE " << elem->value << " and " << curr->value << endl;
-                return;
-            }
-            else{
-            cout << "NO cycle " << elem->value << " and " << curr->value << endl;
-            }
+    for(auto n : curr->neighbors) {
+        if(visited[n->value] == 1 && parent != n) {
+            cycle = true;
+            return cycle;
         }
-        detectCycle(elem, curr, visited);
+
+        else if(visited[n->value] == 0) {
+            detectCycle(n, curr, visited, cycle);
+        }
     }
+
+    return cycle;
+
 }
 
 
@@ -126,7 +127,9 @@ int main() {
 
     cout << "\nLet's try to find cycle points" << endl;
     vector<int> cycle0(6,0);
-    detectCycle(groundzero, nullptr, cycle0);
+    bool fact = false;
+    bool found = detectCycle(groundzero, nullptr, cycle0, fact);
+    //cout << "Cycle Found: " << found << endl;
 
     node* n0 = new node(0);
     node* n1 = new node(1);
@@ -142,7 +145,32 @@ int main() {
 
     cout << "\nLet's try to find cycle points" << endl;
     vector<int> cycle1(3,0);
-    detectCycle(n0, nullptr, cycle1);
+    fact = false;
+    found = detectCycle(groundzero, nullptr, cycle1, fact);
+    cout << "Cycle Found: " << found << endl;
+
+    node* t1 = new node(100);
+    node* t2 = new node(200);
+    node* t3 = new node(300);
+    node* t4 = new node(400);
+    node* t5 = new node(500);
+
+    t1->neighbors.push_back(t2);
+    t2->neighbors.push_back(t1);
+    t2->neighbors.push_back(t3);
+    t2->neighbors.push_back(t4);
+    t2->neighbors.push_back(t5);
+    t3->neighbors.push_back(t2);
+    t4->neighbors.push_back(t2);
+    t5->neighbors.push_back(t2);
+
+
+
+    cout << "\nLet's try to find cycle points" << endl;
+    vector<int> cycle2(5,0);
+    fact = false;
+    found = detectCycle(t1, nullptr, cycle2, fact);
+    cout << "Cycle Found: " << found << endl;
 
     cout << "\n Can not do topological sorting due to it needing to test DAGS which are directed!" << endl;
 
