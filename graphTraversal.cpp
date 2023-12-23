@@ -2,6 +2,8 @@
 #include <vector>
 #include <queue> 
 #include <stack>
+#include <algorithm>
+#include <set>
 using namespace std;
 
 
@@ -15,32 +17,29 @@ using namespace std;
 */
 void dijkstra(int given, vector<vector<int>> graph) {
 
+    vector<int> distance(6,INT_MAX);
     vector<int> visited(6,0);
-    vector<int> distance(6, INT_MAX);
     queue<int> nav;
+
+    distance[given] = 0;
+    visited[given] = 1;
     nav.push(given);
 
-    visited[given] = 1;
-    distance[given] = 0;
-
     while(!nav.empty()) {
-        for(int i = 0; i < 6; i++) {
-            if(graph[nav.front()][i] != 0 && nav.front() != i) {
-                if(distance[i] > graph[nav.front()][i] + distance[nav.front()]) {
-                    distance[i] = graph[nav.front()][i] + distance[nav.front()];
-                }
-                if(visited[i] == 0) {
-                    visited[i] = 1;
-                    nav.push(i);
-                }
+        for(int i = 0; i < graph.size(); i++) {
+            if(nav.front() != i && graph[nav.front()][i] != 0 && distance[i] > distance[nav.front()] + graph[nav.front()][i]) {
+                distance[i] = distance[nav.front()] + graph[nav.front()][i];
+            }
+            if(visited[i] == 0 && graph[nav.front()][i] != 0) {
+                nav.push(i);
+                visited[i] = 1;
             }
         }
-
         nav.pop();
     }
 
-    for(int i = 0; i < 6; i++) {
-        cout << i << "\'s min distance is: " << distance[i] << endl;
+    for(int i = 0; i < distance.size(); i++) {
+        cout << i << "\'s shortest distance is... " << distance[i] << endl;
     }
 }
 
@@ -50,8 +49,76 @@ void dijkstra(int given, vector<vector<int>> graph) {
         chose the cheapest weight that connects an unvisited node
         keep adding cheap weights until all nodes are connected
 */
-void kruskal() {
 
+// This is so we can properly sort the edges by cheapest
+bool helpK(vector<int> a, vector<int> b){
+    return a[2] < b[2];
+}
+
+void kruskal(int numNodes, vector<vector<int>> edges) {
+    
+    sort(edges.begin(), edges.end(), helpK);
+
+    vector<vector<int>> mst;
+    vector<int> visited(numNodes, 0);
+    
+    
+    for(auto elem : edges) {
+        if(visited[elem[0]] == 0 || visited[elem[1]] == 0) {
+            visited[elem[0]] = 1;
+            visited[elem[1]] = 1;
+            mst.push_back(elem);
+        }
+    }
+
+    cout << "We created the MST of..." << endl;
+
+    for(auto elem : mst) {
+        cout << "From " << elem[0] << " to " << elem[1] << " w/ a weight of " << elem[2] << endl; 
+    }
+}
+
+/*
+    How Prim's works
+        pick a node
+        connect the min node that reaches out
+        keep picking min node w/i network that connects min node
+
+*/
+
+void prim(int start, vector<vector<pair<int,int>>> aj) {
+
+    int result = 0;
+    set<int> visited;
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> minPQ;
+    minPQ.push(make_pair(0, start)); // weight, node
+
+    vector<pair<int,int>> mst;
+
+    while(visited.size() != aj.size()) {
+        pair<int,int> temp = minPQ.top();
+        minPQ.pop();
+        if(visited.find(temp.second) != visited.end()) {
+            continue;
+        }
+
+        result += temp.first;
+        visited.insert(temp.second);
+        mst.push_back(make_pair(temp.second, temp.first));
+
+        for(int i = 0; i < aj[temp.second].size(); i++) {
+            if(visited.find(aj[temp.second][i].first) == visited.end()) {
+                minPQ.push(make_pair(aj[temp.second][i].second, aj[temp.second][i].first));
+            }
+        }
+
+    }
+
+    for(auto elem : mst) {
+        cout << "Chose at node (" << elem.first << ") of weight: " << elem.second << " to include in the MST" << endl;
+    }
+
+    
 }
 
 int main() {
@@ -71,11 +138,37 @@ int main() {
     graph[4][5] = 15;
     graph[3][5] = 15;
 
+    cout << "\nLet's run dijkstra's algotithm, it works for both directed and undirected." << endl;
     dijkstra(0, graph);
 
+    vector<vector<int>> edges;
+    // assume edges go both ways! c:
+    edges.push_back({0,1,10});
+    edges.push_back({0,2,10});
+    edges.push_back({1,3,5});
+    edges.push_back({1,2,5});
+    edges.push_back({2,4,20});
+    edges.push_back({3,5,15});
+    edges.push_back({4,3,20});
+    edges.push_back({4,5,15});
 
-    cout << "Let's run dijkstra's algotithm, it works for both directed and undirected." << endl;
+    cout << "\nLet's run kruskal's algotithm, it works for undirected. PRODUCES MST" << endl;
+    kruskal(6, edges);
 
+    vector<vector<pair<int,int>>> aj (6, vector<pair<int,int>>());
+
+    aj[0].push_back(make_pair(1,10));
+    aj[0].push_back(make_pair(2,10));
+    aj[1].push_back(make_pair(3,5));
+    aj[1].push_back(make_pair(2,5));
+    aj[2].push_back(make_pair(4,20));
+    aj[3].push_back(make_pair(5,15));
+    aj[4].push_back(make_pair(3,20));
+    aj[4].push_back(make_pair(5,15));
+
+    cout << "\nLet's run prim's algotithm, it works for undirected. PRODUCES MST" << endl;
+
+    prim(0, aj);
 
 
 }
