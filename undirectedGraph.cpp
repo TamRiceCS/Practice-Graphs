@@ -66,25 +66,25 @@ void recursiveDFS(node* start, vector<int>& visited) {
 // if node connects to an already visited node that isn't the prior node, a cycle was made.
 
 bool detectCycle(node* curr, node* parent, vector<int>& visited, bool& cycle) {
-    if(visited[curr->value] = 1 && cycle == true) {
+    
+    if(cycle == true) {
         return cycle;
     }
 
     visited[curr->value] = 1;
 
     for(auto n : curr->neighbors) {
-        if(visited[n->value] == 1 && parent != n) {
+        if(visited[n->value] == 1 && n != parent) {
             cycle = true;
-            return cycle;
+            break;
         }
-
-        else if(visited[n->value] == 0) {
+        if(visited[n->value] == 0) {
             detectCycle(n, curr, visited, cycle);
         }
     }
 
-    return cycle;
 
+    return cycle;
 }
 
 
@@ -129,7 +129,7 @@ int main() {
     vector<int> cycle0(6,0);
     bool fact = false;
     bool found = detectCycle(groundzero, nullptr, cycle0, fact);
-    //cout << "Cycle Found: " << found << endl;
+    cout << "Cycle Found: " << found << endl;
 
     node* n0 = new node(0);
     node* n1 = new node(1);
@@ -149,11 +149,11 @@ int main() {
     found = detectCycle(groundzero, nullptr, cycle1, fact);
     cout << "Cycle Found: " << found << endl;
 
-    node* t1 = new node(100);
-    node* t2 = new node(200);
-    node* t3 = new node(300);
-    node* t4 = new node(400);
-    node* t5 = new node(500);
+    node* t1 = new node(0);
+    node* t2 = new node(1);
+    node* t3 = new node(2);
+    node* t4 = new node(3);
+    node* t5 = new node(4);
 
     t1->neighbors.push_back(t2);
     t2->neighbors.push_back(t1);

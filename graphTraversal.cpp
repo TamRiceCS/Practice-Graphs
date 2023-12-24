@@ -17,30 +17,32 @@ using namespace std;
 */
 void dijkstra(int given, vector<vector<int>> graph) {
 
-    vector<int> distance(6,INT_MAX);
-    vector<int> visited(6,0);
+    vector<int> visited(graph.size(), 0);
+    vector<int> distance(graph.size(), INT_MAX);
     queue<int> nav;
-
-    distance[given] = 0;
-    visited[given] = 1;
     nav.push(given);
+    distance[given] = 0;
 
     while(!nav.empty()) {
+        visited[nav.front()] = 1;
         for(int i = 0; i < graph.size(); i++) {
-            if(nav.front() != i && graph[nav.front()][i] != 0 && distance[i] > distance[nav.front()] + graph[nav.front()][i]) {
-                distance[i] = distance[nav.front()] + graph[nav.front()][i];
-            }
-            if(visited[i] == 0 && graph[nav.front()][i] != 0) {
-                nav.push(i);
-                visited[i] = 1;
+            if(nav.front() != i && graph[nav.front()][i] != 0) {
+                if(distance[i] > distance[nav.front()] + graph[nav.front()][i]) {
+                    distance[i] = distance[nav.front()] + graph[nav.front()][i];
+                }
+                if(visited[i] != 1) {
+                    nav.push(i);
+                }
+
             }
         }
         nav.pop();
     }
 
     for(int i = 0; i < distance.size(); i++) {
-        cout << i << "\'s shortest distance is... " << distance[i] << endl;
+        cout << i << "\'s min distance is... " << distance[i] << endl;
     }
+   
 }
 
 /*
@@ -58,37 +60,36 @@ bool helpK(vector<int> a, vector<int> b){
 void kruskal(int numNodes, vector<vector<int>> edges) {
     
     sort(edges.begin(), edges.end(), helpK);
-
-    vector<vector<int>> mst;
     vector<int> visited(numNodes, 0);
-    
-    
-    for(auto elem : edges) {
-        if(visited[elem[0]] == 0 || visited[elem[1]] == 0) {
-            visited[elem[0]] = 1;
-            visited[elem[1]] = 1;
-            mst.push_back(elem);
+    vector<vector<int>> mst;
+
+    for(int i = 0; i < edges.size(); i++) {
+        if(visited[edges[i][0]] == 0 || visited[edges[i][1]] == 0) {
+            visited[edges[i][0]] = 1;
+            visited[edges[i][1]] = 1;
+            mst.push_back(edges[i]);
         }
     }
 
-    cout << "We created the MST of..." << endl;
-
     for(auto elem : mst) {
-        cout << "From " << elem[0] << " to " << elem[1] << " w/ a weight of " << elem[2] << endl; 
+        cout << "Edge selected from " << elem[0] << " to " << elem[1]  << " with a weight of " << elem[2] << endl;
     }
+
 }
 
 /*
     How Prim's works
         pick a node
         connect the min node that reaches out
-        keep picking min node w/i network that connects min node
+        keep picking min node w/i network that connects an unvisited node
 
 */
 
-void prim(int start, vector<vector<pair<int,int>>> aj) {
+bool helperP(pair<int,int> a, pair<int,int> b) {
+    return a.second < b.second;
+}
 
-    int result = 0;
+void prim(int start, vector<vector<pair<int,int>>> aj) {
     set<int> visited;
     priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> minPQ;
     minPQ.push(make_pair(0, start)); // weight, node
@@ -102,7 +103,6 @@ void prim(int start, vector<vector<pair<int,int>>> aj) {
             continue;
         }
 
-        result += temp.first;
         visited.insert(temp.second);
         mst.push_back(make_pair(temp.second, temp.first));
 
@@ -118,7 +118,8 @@ void prim(int start, vector<vector<pair<int,int>>> aj) {
         cout << "Chose at node (" << elem.first << ") of weight: " << elem.second << " to include in the MST" << endl;
     }
 
-    
+
+
 }
 
 int main() {
