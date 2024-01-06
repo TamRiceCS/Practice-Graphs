@@ -79,45 +79,57 @@ void kruskal(int numNodes, vector<vector<int>> edges) {
 
 /*
     How Prim's works
-        pick a node
-        connect the min node that reaches out
-        keep picking min node w/i network that connects an unvisited node
+        pick a node w/ min weight (or start at source node)
+        include node in mst
+        update all other node distances from that node
+        repeat until all nodes are included
 
 */
 
-bool helperP(pair<int,int> a, pair<int,int> b) {
-    return a.second < b.second;
-}
 
 void prim(int start, vector<vector<pair<int,int>>> aj) {
-    set<int> visited;
-    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> minPQ;
-    minPQ.push(make_pair(0, start)); // weight, node
 
-    vector<pair<int,int>> mst;
+    // aj is of the format aj[orginNode] = {end, weight}
+
+    set<int> visited; // nodes we have visited
+    vector<int> mst(aj.size(), INT_MAX); // mst[node] = weight
+    int curr = start; // node we are iter through
+    int min = start; // node that is the curr min node val that isn't in set
+    mst[start] = 0;
+
 
     while(visited.size() != aj.size()) {
-        pair<int,int> temp = minPQ.top();
-        minPQ.pop();
-        if(visited.find(temp.second) != visited.end()) {
-            continue;
-        }
+        visited.insert(min);
 
-        visited.insert(temp.second);
-        mst.push_back(make_pair(temp.second, temp.first));
+        for(int i = 0; i < aj[min].size(); i++) {
+            // if the min exploritory edge is less than the recorded prior edges
+            int newWeight = aj[min][i].second;
+            int toNode = aj[min][i].first;
+            int oldWeight = mst[toNode];
 
-        for(int i = 0; i < aj[temp.second].size(); i++) {
-            if(visited.find(aj[temp.second][i].first) == visited.end()) {
-                minPQ.push(make_pair(aj[temp.second][i].second, aj[temp.second][i].first));
+            if(newWeight < oldWeight) {
+                mst[toNode] = aj[min][i].second;
             }
         }
 
+        // find the min of the visited that is not in the set
+        for(int i = 0; i < mst.size(); i++) {
+            // guarantee we take some value
+            if(min == curr && visited.find(i) == visited.end()) {
+                min = i;
+            }
+            else if(mst[i] < mst[min] && visited.find(i) == visited.end()) {
+                min = i;
+            }
+        }
+        
+        curr = min;
+
     }
 
-    for(auto elem : mst) {
-        cout << "Chose at node (" << elem.first << ") of weight: " << elem.second << " to include in the MST" << endl;
+    for(int i = 0; i < mst.size(); i++) {
+        cout << "Node " << i << " added to MST w/ a weight of " << mst[i] << endl;
     }
-
 
 
 }
@@ -156,7 +168,7 @@ int main() {
     cout << "\nLet's run kruskal's algotithm, it works for undirected. PRODUCES MST" << endl;
     kruskal(6, edges);
 
-    vector<vector<pair<int,int>>> aj (6, vector<pair<int,int>>());
+    vector<vector<pair<int,int>>> aj (5, vector<pair<int,int>>());
 
     aj[0].push_back(make_pair(1,10));
     aj[0].push_back(make_pair(2,10));
